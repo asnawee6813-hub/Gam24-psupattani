@@ -1,0 +1,2522 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>เกม 24 – เลือกสมการ</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Anton&family=Outfit:wght@400;500;600;700&family=Noto+Sans+Thai:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #07070d;
+            --card2: #15151f;
+            --ink: #f3f4fb;
+            --mut: #8a8ca3;
+            --acc: #5b8cff;
+            --accbg: rgba(91, 140, 255, .14);
+            --line: rgba(255, 255, 255, .08);
+            --ok: #34d399;
+            --bad: #fb7185;
+            color-scheme: dark;
+            box-sizing: border-box;
+            padding-top: env(safe-area-inset-top, 0px);
+            padding-bottom: env(safe-area-inset-bottom, 0px)
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        html {
+            scroll-padding-top: env(safe-area-inset-top, 0px)
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            color: var(--ink);
+            font-family: 'Noto Sans Thai', 'Outfit', system-ui, sans-serif;
+            background-color: var(--bg);
+            background-image: radial-gradient(70% 50% at 15% 0, rgba(98, 84, 255, .45), transparent 60%), radial-gradient(60% 50% at 95% 100%, rgba(37, 99, 235, .4), transparent 60%);
+            background-attachment: fixed;
+            -webkit-font-smoothing: antialiased
+        }
+
+        .wrap {
+            max-width: 430px;
+            margin: 0 auto;
+            padding: 22px 14px 40px
+        }
+
+        .hidden {
+            display: none !important
+        }
+
+        .scr {
+            position: relative;
+            border-radius: 34px;
+            padding: 26px 20px 22px;
+            background: linear-gradient(180deg, #14172e 0, #0c0c15 240px, #0b0b12);
+            border: 1px solid rgba(255, 255, 255, .07);
+            box-shadow: 0 30px 80px rgba(0, 0, 0, .55), 0 0 0 6px rgba(255, 255, 255, .02);
+            overflow: hidden
+        }
+
+        .scr::before {
+            content: '';
+            position: absolute;
+            inset: 0 0 auto 0;
+            height: 260px;
+            background: radial-gradient(70% 100% at 80% 0, rgba(91, 140, 255, .28), transparent 70%);
+            pointer-events: none
+        }
+
+        .scr>* {
+            position: relative
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font: 600 20px 'Outfit', sans-serif
+        }
+
+        .hero {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 22px 0 14px
+        }
+
+        .hero i,
+        .num {
+            font: 700 30px 'Outfit', sans-serif;
+            font-style: normal;
+            display: grid;
+            place-items: center;
+            border-radius: 20px;
+            background: linear-gradient(150deg, rgba(124, 160, 255, .55), rgba(60, 70, 190, .35));
+            border: 1px solid rgba(255, 255, 255, .18);
+            box-shadow: 0 12px 28px rgba(60, 80, 255, .3), inset 0 1px 0 rgba(255, 255, 255, .3)
+        }
+
+        .hero i {
+            width: 62px;
+            height: 76px;
+            transform: rotate(var(--r));
+            animation: fl 4s ease-in-out infinite var(--d)
+        }
+
+        h1 {
+            font: italic 700 34px/1.15 'Outfit', 'Noto Sans Thai', sans-serif;
+            text-align: center;
+            margin: 6px 0
+        }
+
+        h1 em {
+            font-style: italic;
+            background: linear-gradient(90deg, #7cb0ff, #a78bfa);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent
+        }
+
+        .sub {
+            text-align: center;
+            color: var(--mut);
+            font-size: 14px;
+            margin: 0 0 18px;
+            font-weight: 300
+        }
+
+        input {
+            width: 100%;
+            padding: 14px 18px;
+            border-radius: 999px;
+            border: 1px solid var(--line);
+            background: rgba(255, 255, 255, .04);
+            color: var(--ink);
+            font: inherit;
+            font-size: 16px;
+            text-align: center;
+            outline: none;
+            transition: .15s
+        }
+
+        input:focus {
+            border-color: var(--acc);
+            box-shadow: 0 0 0 3px var(--accbg)
+        }
+
+        .sh {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin: 24px 0 10px;
+            font-size: 17px;
+            font-weight: 600
+        }
+
+        .tiles {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px
+        }
+
+        .tile {
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 4px;
+            text-align: left;
+            padding: 16px;
+            min-height: 120px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, .08);
+            background: linear-gradient(150deg, #262a3d, #15161f);
+            color: var(--ink);
+            font: inherit;
+            cursor: pointer;
+            transition: .2s
+        }
+
+        .tile svg {
+            width: 30px;
+            height: 30px;
+            stroke: #9ec1ff;
+            fill: none;
+            stroke-width: 1.7;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            margin-bottom: auto;
+            filter: drop-shadow(0 4px 10px rgba(91, 140, 255, .7))
+        }
+
+        .tile b {
+            font-size: 15px;
+            font-weight: 600
+        }
+
+        .tile small {
+            font-size: 11px;
+            color: #aab6d8;
+            font-weight: 300
+        }
+
+        .tile.on {
+            background: linear-gradient(150deg, #2f6bff, #1a2a86);
+            border-color: rgba(158, 193, 255, .6);
+            box-shadow: 0 10px 30px rgba(47, 107, 255, .35)
+        }
+
+        .difs {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px
+        }
+
+        .dif {
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            background: none;
+            border: 0;
+            color: var(--mut);
+            font: inherit;
+            font-size: 13px;
+            cursor: pointer;
+            padding: 4px
+        }
+
+        .dif span {
+            width: 54px;
+            height: 54px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            background: var(--card2);
+            border: 1px solid var(--line);
+            transition: .2s
+        }
+
+        .dif.on {
+            color: var(--ink)
+        }
+
+        .dif.on span {
+            background: linear-gradient(150deg, #2f6bff, #6d4cff);
+            color: #fff;
+            border-color: transparent;
+            box-shadow: 0 8px 22px rgba(79, 92, 255, .5)
+        }
+
+        .rv {
+            animation: up .4s ease
+        }
+
+        .dif em {
+            font-style: normal
+        }
+
+        .dif small {
+            margin-top: -6px;
+            font-size: 11px;
+            color: var(--mut);
+            font-weight: 300
+        }
+
+        .info {
+            text-align: center;
+            color: var(--mut);
+            font-size: 12px;
+            line-height: 1.7;
+            margin: 14px 8px 0;
+            font-weight: 300
+        }
+
+        .btn {
+            position: relative;
+            overflow: hidden;
+            display: block;
+            width: 100%;
+            margin-top: 16px;
+            padding: 14px;
+            border-radius: 999px;
+            border: 1px solid rgba(124, 160, 255, .55);
+            background: linear-gradient(180deg, rgba(91, 140, 255, .2), rgba(91, 140, 255, .05));
+            color: #fff;
+            font: inherit;
+            font-weight: 500;
+            font-size: 16px;
+            cursor: pointer;
+            box-shadow: 0 0 24px rgba(91, 140, 255, .18);
+            transition: .2s
+        }
+
+        .btn:hover:not(:disabled) {
+            background: linear-gradient(180deg, rgba(91, 140, 255, .38), rgba(91, 140, 255, .12));
+            transform: translateY(-1px)
+        }
+
+        .btn:disabled {
+            opacity: .35;
+            cursor: not-allowed
+        }
+
+        .btn.alt {
+            border-color: var(--line);
+            background: rgba(255, 255, 255, .03);
+            box-shadow: none
+        }
+
+        .row {
+            display: flex;
+            gap: 10px
+        }
+
+        .row .btn {
+            margin-top: 10px
+        }
+
+        .li {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 14px;
+            margin-bottom: 8px;
+            border-radius: 16px;
+            background: var(--card2);
+            border: 1px solid var(--line)
+        }
+
+        .li.me {
+            border-color: rgba(124, 160, 255, .7);
+            background: rgba(91, 140, 255, .12)
+        }
+
+        .av {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            font: 600 15px 'Outfit', sans-serif;
+            background: #22232f;
+            color: var(--mut);
+            flex: none
+        }
+
+        .av.r1 {
+            background: linear-gradient(135deg, #fcd34d, #f59e0b);
+            color: #3b2a00
+        }
+
+        .av.r2 {
+            background: linear-gradient(135deg, #e5e7eb, #9ca3af);
+            color: #1f2937
+        }
+
+        .av.r3 {
+            background: linear-gradient(135deg, #fdba74, #c2410c);
+            color: #2b1200
+        }
+
+        .nm {
+            flex: 1;
+            min-width: 0
+        }
+
+        .nm b {
+            display: block;
+            font-weight: 500;
+            font-size: 15px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis
+        }
+
+        .nm small {
+            color: var(--mut);
+            font-size: 12px
+        }
+
+        .pt {
+            font: 600 22px 'Outfit', sans-serif
+        }
+
+        .empty {
+            color: var(--mut);
+            font-size: 13px;
+            text-align: center;
+            padding: 16px;
+            font-weight: 300;
+            border: 1px dashed var(--line);
+            border-radius: 16px
+        }
+
+        .top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px
+        }
+
+        .who {
+            font-size: 13px;
+            color: var(--mut);
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap
+        }
+
+        .cap {
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, .07);
+            border-radius: 999px;
+            padding: 3px;
+            flex: none
+        }
+
+        .ib {
+            width: 38px;
+            height: 34px;
+            border: 0;
+            background: none;
+            color: var(--ink);
+            display: grid;
+            place-items: center;
+            cursor: pointer;
+            border-radius: 999px;
+            transition: .15s
+        }
+
+        .ib:hover {
+            background: rgba(255, 255, 255, .1)
+        }
+
+        .ib svg {
+            display: block
+        }
+
+        .sep {
+            width: 1px;
+            height: 16px;
+            background: var(--line)
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin: 16px 0 12px;
+            text-align: center
+        }
+
+        .stats>div {
+            padding: 12px 4px;
+            border-radius: 16px;
+            background: var(--card2);
+            border: 1px solid var(--line)
+        }
+
+        .stats small {
+            display: block;
+            font-size: 11px;
+            color: var(--mut)
+        }
+
+        .stats b {
+            display: inline-block;
+            font: 600 28px/1.2 'Outfit', sans-serif
+        }
+
+        .bar {
+            height: 4px;
+            background: var(--line);
+            border-radius: 4px;
+            overflow: hidden
+        }
+
+        .bar i {
+            display: block;
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(90deg, #5b8cff, #7c5cff)
+        }
+
+        .bar.low i {
+            background: var(--bad)
+        }
+
+        .nums {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin: 22px 0 14px
+        }
+
+        .num {
+            flex: 1;
+            max-width: 84px;
+            aspect-ratio: 1/1.1;
+            font-size: 42px
+        }
+
+        .opt {
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            width: 100%;
+            margin-top: 9px;
+            padding: 12px 14px;
+            border-radius: 18px;
+            border: 1px solid var(--line);
+            background: var(--card2);
+            color: var(--ink);
+            font: 500 19px 'Outfit', 'Noto Sans Thai', sans-serif;
+            cursor: pointer;
+            text-align: left;
+            transition: .15s
+        }
+
+        .opt b {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, .07);
+            color: var(--mut);
+            display: grid;
+            place-items: center;
+            font: 600 14px 'Outfit', sans-serif;
+            flex: none
+        }
+
+        .opt:hover:not(:disabled) {
+            border-color: rgba(124, 160, 255, .7);
+            background: var(--accbg);
+            transform: translateX(4px)
+        }
+
+        .opt.ok {
+            border-color: var(--ok);
+            background: color-mix(in srgb, var(--ok) 16%, transparent)
+        }
+
+        .opt.bad {
+            border-color: var(--bad);
+            background: color-mix(in srgb, var(--bad) 16%, transparent)
+        }
+
+        .opt:disabled {
+            cursor: default
+        }
+
+        .eyebrow {
+            text-align: center;
+            font-size: 12px;
+            color: var(--acc);
+            letter-spacing: .14em
+        }
+
+        .big {
+            text-align: center;
+            font: 700 96px/1 'Outfit', sans-serif;
+            margin: 10px 0 0;
+            background: linear-gradient(180deg, #fff, #7cb0ff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent
+        }
+
+        .bsub {
+            text-align: center;
+            color: var(--mut);
+            font-size: 13px
+        }
+
+        .msg {
+            text-align: center;
+            color: var(--mut);
+            margin: 8px 0 0;
+            font-size: 14px
+        }
+
+        .ov {
+            position: fixed;
+            inset: 0;
+            background: rgba(3, 3, 10, .65);
+            backdrop-filter: blur(6px);
+            display: grid;
+            place-items: center;
+            padding: 20px;
+            z-index: 9
+        }
+
+        .box {
+            background: #12121c;
+            border: 1px solid var(--line);
+            border-radius: 28px;
+            padding: 26px 22px;
+            max-width: 340px;
+            width: 100%;
+            text-align: center
+        }
+
+        .box p {
+            margin: 0 0 4px;
+            font-size: 16px
+        }
+
+        .box small {
+            color: var(--mut);
+            font-weight: 300
+        }
+
+        .rip {
+            position: absolute;
+            border-radius: 50%;
+            background: #fff;
+            opacity: .25;
+            transform: scale(0);
+            animation: rp .6s ease-out forwards;
+            pointer-events: none
+        }
+
+        @keyframes rp {
+            to {
+                transform: scale(1);
+                opacity: 0
+            }
+        }
+
+        @keyframes fl {
+            50% {
+                transform: translateY(-8px) rotate(var(--r))
+            }
+        }
+
+        @keyframes up {
+            from {
+                opacity: 0;
+                transform: translateY(14px)
+            }
+
+            to {
+                opacity: 1;
+                transform: none
+            }
+        }
+
+        @keyframes pop {
+            from {
+                opacity: 0;
+                transform: scale(.6) rotate(-6deg)
+            }
+
+            to {
+                opacity: 1;
+                transform: none
+            }
+        }
+
+        @keyframes slide {
+            from {
+                opacity: 0;
+                transform: translateX(-14px)
+            }
+
+            to {
+                opacity: 1;
+                transform: none
+            }
+        }
+
+        @keyframes shake {
+
+            20%,
+            60% {
+                transform: translateX(-7px)
+            }
+
+            40%,
+            80% {
+                transform: translateX(7px)
+            }
+        }
+
+        @keyframes pulse {
+            50% {
+                transform: scale(1.14)
+            }
+        }
+
+        @keyframes glow {
+            from {
+                box-shadow: 0 0 0 0 color-mix(in srgb, var(--ok) 55%, transparent)
+            }
+
+            to {
+                box-shadow: 0 0 0 16px transparent
+            }
+        }
+
+        .scr.in {
+            animation: up .45s cubic-bezier(.2, .7, .2, 1)
+        }
+
+        .scr.shake {
+            animation: shake .4s
+        }
+
+        .num {
+            animation: pop .45s cubic-bezier(.3, 1.4, .5, 1) backwards
+        }
+
+        .num:nth-child(2) {
+            animation-delay: .06s
+        }
+
+        .num:nth-child(3) {
+            animation-delay: .12s
+        }
+
+        .num:nth-child(4) {
+            animation-delay: .18s
+        }
+
+        .opt {
+            animation: slide .35s ease backwards
+        }
+
+        .opt:nth-child(1) {
+            animation-delay: .12s
+        }
+
+        .opt:nth-child(2) {
+            animation-delay: .18s
+        }
+
+        .opt:nth-child(3) {
+            animation-delay: .24s
+        }
+
+        .opt:nth-child(4) {
+            animation-delay: .3s
+        }
+
+        .opt.ok {
+            animation: glow .6s ease-out
+        }
+
+        #tl.low {
+            color: var(--bad);
+            animation: pulse 1s infinite
+        }
+
+        #cdn {
+            position: fixed;
+            inset: 0;
+            z-index: 50;
+            display: grid;
+            place-items: center;
+            background: radial-gradient(circle at 50% 50%, rgba(60, 70, 190, .4), rgba(5, 5, 12, .93) 70%);
+            backdrop-filter: blur(8px)
+        }
+
+        #cdn>* {
+            grid-area: 1/1
+        }
+
+        .rg {
+            width: 240px;
+            height: 240px;
+            border-radius: 50%;
+            border: 2px solid rgba(124, 160, 255, .7);
+            box-shadow: 0 0 60px rgba(91, 140, 255, .5), inset 0 0 60px rgba(91, 140, 255, .25);
+            animation: rg .9s ease-out
+        }
+
+        .cn {
+            font: italic 700 150px/1 'Outfit', sans-serif;
+            padding: 0 .1em;
+            background: linear-gradient(180deg, #fff, #7cb0ff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: cnp .9s cubic-bezier(.2, .8, .2, 1);
+            filter: drop-shadow(0 0 30px rgba(91, 140, 255, .7))
+        }
+
+        .cn.go {
+            font-size: 104px;
+            background: linear-gradient(90deg, #34d399, #5b8cff, #a78bfa);
+            -webkit-background-clip: text;
+            background-clip: text
+        }
+
+        .cl {
+            transform: translateY(130px);
+            font-size: 13px;
+            letter-spacing: .3em;
+            color: var(--mut)
+        }
+
+        @keyframes cnp {
+            0% {
+                transform: scale(.3);
+                opacity: 0
+            }
+
+            30% {
+                transform: scale(1.08);
+                opacity: 1
+            }
+
+            70% {
+                transform: scale(1);
+                opacity: 1
+            }
+
+            100% {
+                transform: scale(1.5);
+                opacity: 0
+            }
+        }
+
+        @keyframes rg {
+            0% {
+                transform: scale(.4);
+                opacity: 1
+            }
+
+            100% {
+                transform: scale(2.2);
+                opacity: 0
+            }
+        }
+
+        #cd,
+        #cr {
+            position: fixed;
+            left: 0;
+            top: 0;
+            pointer-events: none;
+            z-index: 99;
+            border-radius: 50%;
+            opacity: 0
+        }
+
+        #cd {
+            width: 7px;
+            height: 7px;
+            margin: -3.5px 0 0 -3.5px;
+            background: #9ec1ff;
+            transition: opacity .2s
+        }
+
+        #cr {
+            width: 34px;
+            height: 34px;
+            margin: -17px 0 0 -17px;
+            border: 1px solid #7cb0ff;
+            transition: width .2s, height .2s, margin .2s, background .2s, opacity .2s
+        }
+
+        #cr.hov {
+            width: 56px;
+            height: 56px;
+            margin: -28px 0 0 -28px;
+            background: var(--accbg)
+        }
+
+        #cr.down {
+            width: 22px;
+            height: 22px;
+            margin: -11px 0 0 -11px
+        }
+
+        html.cx,
+        html.cx * {
+            cursor: none !important
+        }
+
+        html.cx input {
+            cursor: text !important
+        }
+
+        @media (prefers-reduced-motion:reduce) {
+            * {
+                animation: none !important;
+                transition: none !important
+            }
+        }
+
+        /* ===== ธีมโปสเตอร์ย้อนยุค: ครีม ชมพู น้ำเงิน เหลือง ===== */
+        :root {
+            --cream: #f4ead2;
+            --paper: #fffaf0;
+            --ink: #1d1f4d;
+            --blue: #4650c8;
+            --pink: #eb9bd0;
+            --yellow: #f8de4a;
+            --red: #e2553c;
+            --bg: #eb9bd0;
+            --card2: #fffaf0;
+            --mut: #5d5f8f;
+            --acc: #4650c8;
+            --accbg: rgba(70, 80, 200, .14);
+            --line: rgba(29, 31, 77, .28);
+            --ok: #1f9d63;
+            --bad: #e2553c;
+            color-scheme: light
+        }
+
+        body {
+            background-color: var(--pink);
+            background-image: repeating-linear-gradient(90deg, transparent 0 70px, rgba(255, 255, 255, .16) 70px 74px);
+            color: var(--ink)
+        }
+
+        .scr {
+            background-color: var(--cream);
+            background-image: radial-gradient(rgba(29, 31, 77, .09) 1.2px, transparent 1.5px);
+            background-size: 14px 14px;
+            border: 3px solid var(--ink);
+            border-radius: 24px;
+            box-shadow: 8px 8px 0 var(--ink);
+            padding-bottom: 34px
+        }
+
+        .scr::before {
+            height: 200px;
+            background: radial-gradient(circle at 90% 12%, var(--yellow) 0 34px, transparent 35px), radial-gradient(circle at 8% 7%, var(--pink) 0 20px, transparent 21px)
+        }
+
+        .scr::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: 14px;
+            border-top: 3px solid var(--ink);
+            background: repeating-linear-gradient(90deg, var(--blue) 0 24px, var(--pink) 24px 48px, var(--yellow) 48px 72px, var(--red) 72px 96px);
+            pointer-events: none
+        }
+
+        .brand {
+            color: var(--ink);
+            font-family: 'Anton', 'Outfit', sans-serif;
+            font-weight: 400;
+            letter-spacing: .04em
+        }
+
+        .hero i,
+        .num {
+            font-family: 'Anton', 'Outfit', sans-serif;
+            font-weight: 400;
+            background: var(--blue);
+            color: var(--yellow);
+            border: 3px solid var(--ink);
+            border-radius: 14px;
+            box-shadow: 4px 4px 0 var(--ink)
+        }
+
+        .hero i {
+            width: 62px;
+            height: 80px;
+            font-size: 44px
+        }
+
+        .hero i:nth-child(2) {
+            background: var(--pink);
+            color: var(--ink)
+        }
+
+        .hero i:nth-child(3) {
+            background: var(--yellow);
+            color: var(--ink)
+        }
+
+        .hero i:nth-child(4) {
+            background: var(--red);
+            color: var(--cream)
+        }
+
+        h1 {
+            font: 400 40px/1.15 'Anton', 'Noto Sans Thai', sans-serif;
+            color: var(--ink);
+            letter-spacing: .02em
+        }
+
+        h1 em {
+            font-style: normal;
+            background: var(--blue);
+            -webkit-background-clip: border-box;
+            background-clip: border-box;
+            color: var(--yellow);
+            padding: 0 .3em;
+            border-radius: 10px;
+            border: 3px solid var(--ink);
+            display: inline-block;
+            transform: rotate(-3deg)
+        }
+
+        .sub,
+        .info,
+        .bsub,
+        .msg {
+            color: var(--mut);
+            font-weight: 400
+        }
+
+        input {
+            background: var(--paper);
+            color: var(--ink);
+            border: 3px solid var(--ink);
+            box-shadow: 3px 3px 0 var(--ink)
+        }
+
+        input:focus {
+            border-color: var(--ink);
+            box-shadow: 3px 3px 0 var(--blue);
+            background: #fff
+        }
+
+        input::placeholder {
+            color: #8a8cb5
+        }
+
+        .sh {
+            color: var(--ink);
+            font-weight: 700
+        }
+
+        .tile {
+            background: var(--paper);
+            color: var(--ink);
+            border: 3px solid var(--ink);
+            border-radius: 18px;
+            box-shadow: 4px 4px 0 var(--ink);
+            transition: transform .12s, box-shadow .12s, background .2s
+        }
+
+        .tile svg {
+            stroke: var(--blue);
+            filter: none;
+            stroke-width: 2
+        }
+
+        .tile small {
+            color: var(--mut);
+            font-weight: 400
+        }
+
+        .tile:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0 var(--ink)
+        }
+
+        .tile.on {
+            background: var(--yellow);
+            border-color: var(--ink);
+            box-shadow: 2px 2px 0 var(--ink);
+            transform: translate(2px, 2px)
+        }
+
+        .tile.on svg {
+            stroke: var(--ink)
+        }
+
+        .tile.on small {
+            color: var(--ink)
+        }
+
+        .dif {
+            color: var(--ink)
+        }
+
+        .dif span {
+            background: var(--paper);
+            border: 3px solid var(--ink);
+            color: var(--blue);
+            box-shadow: 3px 3px 0 var(--ink)
+        }
+
+        .dif.on span {
+            background: var(--yellow);
+            color: var(--ink);
+            border-color: var(--ink);
+            box-shadow: 1px 1px 0 var(--ink);
+            transform: translate(2px, 2px)
+        }
+
+        .btn {
+            background: var(--blue);
+            color: #fff;
+            border: 3px solid var(--ink);
+            box-shadow: 4px 4px 0 var(--ink);
+            font-weight: 700;
+            transition: transform .12s, box-shadow .12s, background .2s
+        }
+
+        .btn:hover:not(:disabled) {
+            background: #3a43b3;
+            transform: translate(-1px, -1px);
+            box-shadow: 5px 5px 0 var(--ink)
+        }
+
+        .btn:active:not(:disabled) {
+            transform: translate(3px, 3px);
+            box-shadow: 1px 1px 0 var(--ink)
+        }
+
+        .btn:disabled {
+            opacity: .45
+        }
+
+        .btn.alt {
+            background: var(--paper);
+            color: var(--ink);
+            box-shadow: 4px 4px 0 var(--ink)
+        }
+
+        .btn.alt:hover:not(:disabled) {
+            background: var(--yellow)
+        }
+
+        .li {
+            background: var(--paper);
+            border: 2px solid var(--ink);
+            border-radius: 14px
+        }
+
+        .li.me {
+            background: var(--yellow);
+            border-color: var(--ink)
+        }
+
+        .av {
+            background: #cfd8f5;
+            color: var(--ink);
+            border: 2px solid var(--ink);
+            font-family: 'Anton', 'Outfit', sans-serif;
+            font-weight: 400
+        }
+
+        .av.r1 {
+            background: var(--yellow);
+            color: var(--ink)
+        }
+
+        .av.r2 {
+            background: #dcdff0;
+            color: var(--ink)
+        }
+
+        .av.r3 {
+            background: #f4a77b;
+            color: var(--ink)
+        }
+
+        .nm small {
+            color: var(--mut)
+        }
+
+        .pt {
+            font-family: 'Anton', 'Outfit', sans-serif;
+            font-weight: 400;
+            color: var(--blue)
+        }
+
+        .empty {
+            border: 2px dashed var(--ink);
+            color: var(--mut);
+            font-weight: 400
+        }
+
+        .who {
+            color: var(--ink);
+            font-weight: 500
+        }
+
+        .cap {
+            background: var(--paper);
+            border: 2px solid var(--ink)
+        }
+
+        .ib {
+            color: var(--ink)
+        }
+
+        .ib:hover {
+            background: var(--yellow)
+        }
+
+        .sep {
+            background: var(--ink)
+        }
+
+        .stats>div {
+            background: var(--paper);
+            border: 2px solid var(--ink);
+            border-radius: 14px;
+            box-shadow: 3px 3px 0 var(--ink)
+        }
+
+        .stats small {
+            color: var(--mut)
+        }
+
+        .stats b {
+            font-family: 'Anton', 'Outfit', sans-serif;
+            font-weight: 400;
+            color: var(--ink)
+        }
+
+        .bar {
+            height: 14px;
+            background: var(--paper);
+            border: 2px solid var(--ink);
+            border-radius: 8px
+        }
+
+        .bar i {
+            background: repeating-linear-gradient(45deg, var(--blue) 0 8px, #6a73e0 8px 16px)
+        }
+
+        .bar.low i {
+            background: repeating-linear-gradient(45deg, var(--red) 0 8px, #f08a74 8px 16px)
+        }
+
+        .num {
+            font-size: 50px;
+            color: var(--yellow)
+        }
+
+        .nums .num:nth-child(2) {
+            background: var(--pink);
+            color: var(--ink)
+        }
+
+        .nums .num:nth-child(3) {
+            background: var(--yellow);
+            color: var(--ink)
+        }
+
+        .nums .num:nth-child(4) {
+            background: var(--red);
+            color: var(--cream)
+        }
+
+        .opt {
+            background: var(--paper);
+            color: var(--ink);
+            border: 3px solid var(--ink);
+            border-radius: 16px;
+            box-shadow: 4px 4px 0 var(--ink);
+            font-weight: 600;
+            transition: transform .12s, box-shadow .12s, background .2s
+        }
+
+        .opt b {
+            background: var(--yellow);
+            color: var(--ink);
+            border: 2px solid var(--ink);
+            font-family: 'Anton', 'Outfit', sans-serif;
+            font-weight: 400
+        }
+
+        .opt:hover:not(:disabled) {
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0 var(--ink);
+            background: #fff3c4;
+            border-color: var(--ink)
+        }
+
+        .opt:active:not(:disabled) {
+            transform: translate(3px, 3px);
+            box-shadow: 1px 1px 0 var(--ink)
+        }
+
+        .opt.ok {
+            background: #b9ecc9;
+            border-color: var(--ink)
+        }
+
+        .opt.ok b {
+            background: var(--ok);
+            color: #fff
+        }
+
+        .opt.bad {
+            background: #ffc4b6;
+            border-color: var(--ink)
+        }
+
+        .opt.bad b {
+            background: var(--red);
+            color: #fff
+        }
+
+        .opt:disabled {
+            opacity: 1
+        }
+
+        .opt:disabled:not(.ok):not(.bad) {
+            opacity: .55;
+            box-shadow: 2px 2px 0 var(--ink)
+        }
+
+        .eyebrow {
+            color: var(--red);
+            font-weight: 700
+        }
+
+        .big {
+            font-family: 'Anton', 'Outfit', sans-serif;
+            font-weight: 400;
+            background: none;
+            -webkit-background-clip: border-box;
+            background-clip: border-box;
+            color: var(--yellow);
+            -webkit-text-stroke: 3px var(--ink);
+            paint-order: stroke fill;
+            text-shadow: 5px 5px 0 var(--ink)
+        }
+
+        .ov {
+            background: rgba(29, 31, 77, .62)
+        }
+
+        .box {
+            background: var(--cream);
+            border: 3px solid var(--ink);
+            box-shadow: 6px 6px 0 var(--ink);
+            border-radius: 22px
+        }
+
+        .box small {
+            color: var(--mut);
+            font-weight: 400
+        }
+
+        .rip {
+            background: var(--ink);
+            opacity: .14
+        }
+
+        #tl.low {
+            color: var(--red)
+        }
+
+        #cdn {
+            background: radial-gradient(circle at 50% 50%, rgba(70, 80, 200, .94), rgba(29, 31, 77, .97) 72%)
+        }
+
+        .rg {
+            border: 8px solid var(--yellow);
+            box-shadow: 8px 8px 0 var(--pink)
+        }
+
+        .cn {
+            font-family: 'Anton', 'Outfit', sans-serif;
+            font-style: normal;
+            font-weight: 400;
+            background: none;
+            -webkit-background-clip: border-box;
+            background-clip: border-box;
+            color: var(--yellow);
+            -webkit-text-stroke: 4px var(--ink);
+            paint-order: stroke fill;
+            text-shadow: 9px 9px 0 var(--pink);
+            filter: none
+        }
+
+        .cn.go {
+            background: none;
+            color: var(--pink);
+            text-shadow: 7px 7px 0 var(--yellow)
+        }
+
+        .cl {
+            color: var(--cream);
+            font-weight: 500
+        }
+
+        #cd {
+            background: var(--ink)
+        }
+
+        #cr {
+            border: 2px solid var(--ink)
+        }
+
+        #cr.hov {
+            background: rgba(248, 222, 74, .55)
+        }
+
+        /* ===== หน้าโหลด 1-100 และมิติของหน้าเกม ===== */
+        :root {
+            --mx: 0;
+            --my: 0
+        }
+
+        #ld {
+            position: fixed;
+            inset: 0;
+            z-index: 400;
+            display: grid;
+            place-items: center;
+            background-color: var(--pink);
+            background-image: repeating-linear-gradient(90deg, transparent 0 70px, rgba(255, 255, 255, .16) 70px 74px);
+            border-bottom: 4px solid var(--ink);
+            box-shadow: 0 10px 0 var(--yellow), 0 20px 0 var(--blue);
+            transition: transform .85s cubic-bezier(.75, 0, .2, 1)
+        }
+
+        #ld.out {
+            transform: translateY(-125%);
+            pointer-events: none
+        }
+
+        .ldw {
+            width: min(86vw, 360px);
+            text-align: center
+        }
+
+        .ldw .hero {
+            margin: 0 0 14px
+        }
+
+        .ldnum {
+            display: flex;
+            justify-content: center;
+            align-items: baseline;
+            margin-bottom: 14px;
+            font: 400 clamp(88px, 26vw, 140px)/1 'Anton', 'Outfit', sans-serif;
+            color: var(--yellow);
+            -webkit-text-stroke: 4px var(--ink);
+            paint-order: stroke fill;
+            text-shadow: 6px 6px 0 var(--ink)
+        }
+
+        .ldnum b {
+            font-weight: 400;
+            min-width: 1.6ch;
+            text-align: right
+        }
+
+        .ldnum small {
+            font-size: .38em;
+            margin-left: .1em
+        }
+
+        .ldbar {
+            height: 22px;
+            border: 3px solid var(--ink);
+            border-radius: 12px;
+            background: var(--paper);
+            overflow: hidden;
+            box-shadow: 4px 4px 0 var(--ink)
+        }
+
+        .ldbar i {
+            display: block;
+            height: 100%;
+            width: 0;
+            background: repeating-linear-gradient(45deg, var(--blue) 0 10px, #6a73e0 10px 20px);
+            background-size: 28px 28px;
+            animation: stripe .6s linear infinite
+        }
+
+        #ldt {
+            margin: 16px 0 0;
+            font-weight: 700;
+            color: var(--ink)
+        }
+
+        @keyframes stripe {
+            to {
+                background-position: 28px 0
+            }
+        }
+
+        #cd,
+        #cr {
+            z-index: 500
+        }
+
+        .hero i,
+        .num {
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 1px 0 var(--ink), 0 2px 0 var(--ink), 0 3px 0 var(--ink), 0 4px 0 var(--ink), 0 5px 0 var(--ink), 0 6px 0 var(--ink), 0 7px 0 var(--ink), 0 18px 20px -6px rgba(29, 31, 77, .5)
+        }
+
+        .hero i::after,
+        .num::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            background: linear-gradient(135deg, rgba(255, 255, 255, .42) 0 24%, transparent 25% 100%);
+            pointer-events: none
+        }
+
+        .wrap {
+            position: relative;
+            z-index: 1;
+            perspective: 1100px
+        }
+
+        .scr {
+            transform: rotateY(calc(var(--mx) * 5deg)) rotateX(calc(var(--my) * -4deg));
+            box-shadow: 8px 8px 0 var(--ink), 15px 15px 0 rgba(29, 31, 77, .22), 0 44px 50px -20px rgba(29, 31, 77, .55)
+        }
+
+        .nums {
+            perspective: 700px;
+            transform: translate(calc(var(--mx) * 7px), calc(var(--my) * 5px))
+        }
+
+        .stats {
+            transform: translate(calc(var(--mx) * 3px), calc(var(--my) * 2px))
+        }
+
+        #opts {
+            perspective: 800px;
+            transform: translate(calc(var(--mx) * -3px), calc(var(--my) * -2px))
+        }
+
+        .num {
+            transform-origin: 50% 0;
+            animation: flipIn .75s cubic-bezier(.2, 1.3, .4, 1) backwards, bob 3.4s ease-in-out 1s infinite
+        }
+
+        .num:nth-child(1) {
+            animation-delay: 0s, 1s
+        }
+
+        .num:nth-child(2) {
+            animation-delay: .09s, 1.4s
+        }
+
+        .num:nth-child(3) {
+            animation-delay: .18s, 1.8s
+        }
+
+        .num:nth-child(4) {
+            animation-delay: .27s, 2.2s
+        }
+
+        .opt {
+            transform-origin: 50% 0;
+            animation: optIn .55s cubic-bezier(.2, .9, .3, 1.15) backwards
+        }
+
+        .opt.ok {
+            animation: glow .6s ease-out
+        }
+
+        #nums.cheer .num {
+            animation: cheer .65s cubic-bezier(.3, 1.6, .5, 1) both
+        }
+
+        #nums.cheer .num:nth-child(2) {
+            animation-delay: .07s
+        }
+
+        #nums.cheer .num:nth-child(3) {
+            animation-delay: .14s
+        }
+
+        #nums.cheer .num:nth-child(4) {
+            animation-delay: .21s
+        }
+
+        #nums.sad .num {
+            animation: sad .6s ease-in-out both
+        }
+
+        @keyframes flipIn {
+            from {
+                opacity: 0;
+                transform: rotateX(-95deg) translateY(-30px)
+            }
+
+            to {
+                opacity: 1;
+                transform: none
+            }
+        }
+
+        @keyframes bob {
+            50% {
+                transform: translateY(-5px)
+            }
+        }
+
+        @keyframes optIn {
+            from {
+                opacity: 0;
+                transform: rotateX(-55deg) translateY(26px)
+            }
+
+            to {
+                opacity: 1;
+                transform: none
+            }
+        }
+
+        @keyframes cheer {
+            40% {
+                transform: translateY(-24px) rotate(-6deg) scale(1.1)
+            }
+
+            100% {
+                transform: none
+            }
+        }
+
+        @keyframes sad {
+            35% {
+                transform: translateY(8px) rotate(4deg) scale(.96)
+            }
+
+            100% {
+                transform: none
+            }
+        }
+
+        #bgfx {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            overflow: hidden
+        }
+
+        #bgfx .p {
+            position: absolute;
+            transform: translate(calc(var(--mx) * var(--d) * 34px), calc(var(--my) * var(--d) * 24px))
+        }
+
+        #bgfx .p i {
+            display: block;
+            width: var(--s);
+            height: var(--s);
+            background: var(--c);
+            border: 3px solid var(--ink);
+            opacity: .85;
+            filter: blur(var(--b));
+            animation: drift var(--t) ease-in-out infinite alternate
+        }
+
+        #bgfx .sq i {
+            border-radius: 10px
+        }
+
+        #bgfx .ci i {
+            border-radius: 50%
+        }
+
+        #bgfx .tr i {
+            border: 0;
+            clip-path: polygon(50% 0, 100% 100%, 0 100%)
+        }
+
+        #bgfx .rg2 i {
+            background: none;
+            border: 7px solid var(--c);
+            border-radius: 50%
+        }
+
+        #bgfx .sy i {
+            width: auto;
+            height: auto;
+            background: none;
+            border: 0;
+            font: 400 var(--s)/1 'Anton', 'Outfit', sans-serif;
+            color: var(--c);
+            -webkit-text-stroke: 2px var(--ink);
+            paint-order: stroke fill
+        }
+
+        @keyframes drift {
+            from {
+                transform: translateY(-14px) rotate(-10deg)
+            }
+
+            to {
+                transform: translateY(14px) rotate(14deg)
+            }
+        }
+
+        /* ===== โหมดจัดสมการ (Math24) ===== */
+        #mb {
+            margin-top: 14px
+        }
+
+        .mval {
+            min-height: 26px;
+            margin: 12px 0 4px;
+            text-align: center;
+            font: 600 18px 'Outfit', sans-serif;
+            color: var(--mut)
+        }
+
+        .mval.hit {
+            color: var(--ok)
+        }
+
+        .mval.err {
+            color: var(--red);
+            font: 600 14px 'Noto Sans Thai', sans-serif
+        }
+
+        .mops {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            margin-top: 8px
+        }
+
+        .mop {
+            flex: 1 1 0;
+            min-width: 44px;
+            max-width: 84px;
+            height: 50px;
+            border: 3px solid var(--ink);
+            border-radius: 14px;
+            background: var(--paper);
+            color: var(--ink);
+            font: 600 24px 'Outfit', sans-serif;
+            box-shadow: 3px 3px 0 var(--ink);
+            cursor: pointer;
+            transition: transform .1s, box-shadow .1s, background .15s
+        }
+
+        .mop:hover:not(:disabled) {
+            background: var(--yellow);
+            transform: translate(-1px, -1px);
+            box-shadow: 4px 4px 0 var(--ink)
+        }
+
+        .mop:active:not(:disabled) {
+            transform: translate(2px, 2px);
+            box-shadow: 1px 1px 0 var(--ink)
+        }
+
+        .macts {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px
+        }
+
+        .mact {
+            flex: 1;
+            padding: 9px;
+            border: 3px solid var(--ink);
+            border-radius: 12px;
+            background: var(--cream);
+            color: var(--ink);
+            font: 600 14px 'Noto Sans Thai', sans-serif;
+            box-shadow: 3px 3px 0 var(--ink);
+            cursor: pointer;
+            transition: transform .1s, box-shadow .1s, background .15s
+        }
+
+        .mact:hover:not(:disabled) {
+            background: var(--yellow)
+        }
+
+        .mact:active:not(:disabled) {
+            transform: translate(2px, 2px);
+            box-shadow: 1px 1px 0 var(--ink)
+        }
+
+        .mop:disabled,
+        .mact:disabled {
+            opacity: .45;
+            cursor: default
+        }
+
+        .msol {
+            margin-top: 12px;
+            padding: 10px;
+            text-align: center;
+            border: 3px solid var(--ink);
+            border-radius: 14px;
+            background: var(--yellow);
+            font: 600 18px 'Outfit', sans-serif
+        }
+
+        .msol small {
+            display: block;
+            margin-bottom: 2px;
+            font: 500 12px 'Noto Sans Thai', sans-serif;
+            color: var(--ink)
+        }
+
+        button.num {
+            padding: 0;
+            cursor: pointer;
+            font-family: 'Anton', 'Outfit', sans-serif
+        }
+
+        button.num:active:not(:disabled) {
+            translate: 0 4px
+        }
+
+        .nums .num.c0 {
+            background: var(--blue);
+            color: var(--yellow)
+        }
+
+        .nums .num.c1 {
+            background: var(--pink);
+            color: var(--ink)
+        }
+
+        .nums .num.c2 {
+            background: var(--yellow);
+            color: var(--ink)
+        }
+
+        .nums .num.c3 {
+            background: var(--red);
+            color: var(--cream)
+        }
+
+        .nums .num.r {
+            background: #1f7a52;
+            color: var(--cream)
+        }
+
+        .nums .num.md {
+            font-size: 38px
+        }
+
+        .nums .num.sm {
+            font-size: 27px
+        }
+
+        .nums .num.still {
+            animation: bob 3.4s ease-in-out infinite;
+            animation-delay: 0s
+        }
+
+        .nums .num.pop {
+            animation: mpop .5s cubic-bezier(.3, 1.6, .5, 1), bob 3.4s ease-in-out infinite;
+            animation-delay: 0s, .5s
+        }
+
+        .nums .num.sel {
+            translate: 0 -8px;
+            box-shadow: 0 0 0 4px var(--paper), 0 0 0 8px var(--ink), 0 14px 18px -4px rgba(29, 31, 77, .5)
+        }
+
+        .nums .num.bad {
+            background: var(--red);
+            color: var(--cream);
+            animation: sad .5s ease-in-out both
+        }
+
+        .nums .num.win {
+            background: var(--ok);
+            color: #fff
+        }
+
+        .mop.on {
+            background: var(--yellow);
+            transform: translate(2px, 2px);
+            box-shadow: 1px 1px 0 var(--ink)
+        }
+
+        .mop.un {
+            color: var(--blue)
+        }
+
+        @keyframes mpop {
+            0% {
+                transform: scale(.35) rotate(-12deg);
+                opacity: .2
+            }
+
+            60% {
+                transform: scale(1.18) rotate(4deg);
+                opacity: 1
+            }
+
+            100% {
+                transform: none
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="ld">
+        <div class="ldw">
+            <div class="hero"><i style="--r:-12deg;--d:0s">6</i><i style="--r:8deg;--d:.5s">×</i><i
+                    style="--r:-6deg;--d:1s">4</i><i style="--r:12deg;--d:1.5s">24</i></div>
+            <div class="ldnum"><b id="ldn">1</b><small>%</small></div>
+            <div class="ldbar"><i id="ldf"></i></div>
+            <p id="ldt">กำลังสับไพ่ตัวเลข…</p>
+        </div>
+    </div>
+    <div class="wrap">
+
+        <section id="s-start" class="scr">
+            <div class="brand"><svg width="28" height="28" viewBox="0 0 28 28">
+                    <defs>
+                        <linearGradient id="lg" x1="0" y1="0" x2="1" y2="1">
+                            <stop stop-color="#5b8cff" />
+                            <stop offset="1" stop-color="#7c5cff" />
+                        </linearGradient>
+                    </defs>
+                    <rect width="28" height="28" rx="8" fill="url(#lg)" /><text x="14" y="19.5" text-anchor="middle"
+                        font-size="14" font-weight="700" fill="#fff" font-family="Outfit,sans-serif">24</text>
+                </svg><span>Game 24</span></div>
+            <div class="hero"><i style="--r:-12deg;--d:0s">6</i><i style="--r:8deg;--d:.5s">×</i><i
+                    style="--r:-6deg;--d:1s">4</i><i style="--r:12deg;--d:1.5s">24</i></div>
+            <h1>เล่นเกม <em>24</em></h1>
+            <p class="sub">เลือกสมการที่ได้ผลลัพธ์เท่ากับ 24 ให้ทันเวลา</p>
+            <input id="name" maxlength="16" placeholder="พิมพ์ชื่อผู้เล่น" autocomplete="off">
+            <div class="sh">โหมด</div>
+            <div class="tiles" id="seg-mode"></div>
+            <div id="style-wrap" class="hidden">
+                <div class="sh">รูปแบบการตอบ</div>
+                <div class="tiles" id="seg-style"></div>
+            </div>
+            <div id="dif-wrap" class="hidden">
+                <div class="sh">ระดับความยาก</div>
+                <div class="difs" id="seg-diff"></div>
+                <p class="info" id="info"></p>
+            </div>
+            <button class="btn" id="go" disabled>เริ่มเกม</button>
+            <div id="lb-wrap" class="hidden">
+                <div class="sh"><span id="lb-t1"></span></div>
+                <div id="lb-start"></div>
+            </div>
+        </section>
+
+        <section id="s-game" class="scr hidden">
+            <div class="top"><span class="who" id="who"></span>
+                <div class="cap"><button class="ib" id="snd" title="เสียง" aria-label="เปิด/ปิดเสียง"></button><i
+                        class="sep"></i><button class="ib" id="stop" title="หยุดเกม" aria-label="หยุดเกม"><svg
+                            viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
+                            stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="6.5" y="6.5" width="11" height="11" rx="2" />
+                        </svg></button></div>
+            </div>
+            <div class="stats">
+                <div><small id="qlab">ข้อ</small><b id="qn">1</b></div>
+                <div><small>คะแนน</small><b id="sc">0</b></div>
+                <div><small id="tlab">เวลา</small><b id="tl">0</b></div>
+            </div>
+            <div class="bar" id="bar"><i id="fill"></i></div>
+            <div class="nums" id="nums"></div>
+            <div id="opts"></div>
+            <div id="mb" class="hidden">
+                <div class="mval" id="mval">&nbsp;</div>
+                <div class="mops" id="mops"></div>
+                <div class="macts"><button class="mact" id="mdel">ลบ</button><button class="mact"
+                        id="mclr">ล้าง</button><button class="mact" id="mskip">ข้าม</button></div>
+                <div class="msol hidden" id="msol"></div>
+            </div>
+        </section>
+
+        <section id="s-end" class="scr hidden">
+            <div class="eyebrow" id="endcat"></div>
+            <p class="msg" id="endmsg"></p>
+            <div class="big" id="fs">0</div>
+            <div class="bsub" id="fsub"></div>
+            <div class="stats" id="endstats"></div>
+            <p class="msg" id="rank"></p>
+            <button class="btn" id="again">เริ่มใหม่</button>
+            <div class="row"><button class="btn alt" id="rename">เปลี่ยนชื่อ</button><button class="btn alt"
+                    id="remode">เปลี่ยนโหมด</button></div>
+            <div class="sh"><span id="lb-t2"></span></div>
+            <div id="lb-end"></div>
+        </section>
+    </div>
+
+    <div class="ov hidden" id="ov">
+        <div class="box">
+            <p>หยุดเกมและบันทึกคะแนนปัจจุบัน?</p><small>เวลาหยุดนับไว้ชั่วคราว</small>
+            <div class="row"><button class="btn alt" id="resume">เล่นต่อ</button><button class="btn"
+                    id="stopok">หยุดเกม</button></div>
+        </div>
+    </div>
+
+    <div id="cdn" class="hidden">
+        <div class="rg" id="cdn-r"></div>
+        <div class="cn" id="cdn-n"></div>
+        <div class="cl" id="cdn-l"></div>
+    </div>
+    <div id="cd"></div>
+    <div id="cr"></div>
+    <script>
+        const TOTAL = 5, ATTACK = 60000, KEY = 'game24_lb_v5';
+        const MODES = { classic: { label: 'คลาสสิก 5 ข้อ' }, attack: { label: 'จับเวลา 1 นาที' } };
+        const STYLES = { choice: { label: 'แบบเลือกคำตอบ' }, build: { label: 'แบบต่อสมการ' } };
+        const MT = { easy: 40000, medium: 45000, expert: 60000 };
+        const MATHDESC = { easy: 'ตัวเลข 1–6 · รวมเลขทีละคู่ให้เหลือ 24', medium: 'ตัวเลข 1–9 · รวมเลขทีละคู่ให้เหลือ 24', expert: 'ตัวเลข 1–9 · มี ² ³ √ เพิ่มให้ · รวมเลขทีละคู่ให้เหลือ 24' };
+        const DIFFS = {
+            easy: { label: 'ง่าย', max: 6, t: 20000, desc: 'ตัวเลข 1–6 · โจทย์ใช้ + × เป็นหลัก · ตัวเลือกต่างจาก 24 ชัดเจน' },
+            medium: { label: 'ปานกลาง', max: 9, t: 20000, desc: 'ตัวเลข 1–9 · ตัวเลือกให้ค่าใกล้เคียง 24' },
+            expert: { label: 'ยาก', max: 9, t: 20000, desc: 'ตัวเลข 1–9 · มียกกำลัง (² ³) และรากที่สอง (√) · ตัวเลือกใกล้ 24 มาก' }
+        };
+        const $ = id => document.getElementById(id);
+        const RM = matchMedia('(prefers-reduced-motion: reduce)').matches, COL = ['#4650c8', '#eb9bd0', '#f8de4a', '#e2553c', '#1f7a52'];
+        function burst(x, y, n = 24) {
+            if (RM) return; for (let i = 0; i < n; i++) {
+                const p = document.createElement('i'), z = 4 + rnd(6);
+                p.style.cssText = `position:fixed;left:${x}px;top:${y}px;width:${z}px;height:${z * (rnd(2) ? 1 : 2.2)}px;background:${COL[rnd(COL.length)]};border-radius:${rnd(2) ? '50%' : '1px'};pointer-events:none;z-index:450`;
+                document.body.appendChild(p); const a = Math.random() * Math.PI * 2, d = 50 + Math.random() * 130;
+                p.animate([{ transform: 'translate(0,0) rotate(0)', opacity: 1 }, { transform: `translate(${Math.cos(a) * d}px,${Math.sin(a) * d + 60}px) rotate(${rnd(720) - 360}deg)`, opacity: 0 }], { duration: 700 + rnd(500), easing: 'cubic-bezier(.15,.7,.3,1)' }).onfinish = () => p.remove()
+            }
+        }
+        function floatText(x, y, t) {
+            if (RM) return; const e = document.createElement('div'); e.textContent = t;
+            e.style.cssText = `position:fixed;left:${x}px;top:${y}px;font:600 30px 'Outfit',sans-serif;color:#e2553c;-webkit-text-stroke:1px #1d1f4d;pointer-events:none;z-index:450;margin:-14px 0 0 -12px`;
+            document.body.appendChild(e); e.animate([{ transform: 'translateY(0)', opacity: 1 }, { transform: 'translateY(-56px)', opacity: 0 }], { duration: 850, easing: 'ease-out' }).onfinish = () => e.remove()
+        }
+        function shake() { const c = $('s-game'); c.classList.remove('shake'); void c.offsetWidth; c.classList.add('shake') }
+        function bump() { if (!RM) $('sc').animate([{ transform: 'scale(1)' }, { transform: 'scale(1.5)', color: '#e2553c' }, { transform: 'scale(1)' }], { duration: 380, easing: 'ease-out' }) }
+        function countUp(el, to) { if (RM || !to) { el.textContent = to; return } const t0 = performance.now(); (function f(t) { const k = Math.min(1, (t - t0) / 700); el.textContent = Math.round(to * (1 - Math.pow(1 - k, 3))); if (k < 1) requestAnimationFrame(f) })(t0) }
+        let snd = true, AC = null; try { snd = localStorage.getItem('game24_snd') !== '0' } catch (e) { }
+        function audio() { if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)() } catch (e) { } } if (AC && AC.state === 'suspended') AC.resume(); return AC }
+        function beep(f, d, v, type) {
+            if (!snd) return; const a = audio(); if (!a) return; const o = a.createOscillator(), g = a.createGain(), t = a.currentTime;
+            o.type = type || 'triangle'; o.frequency.value = f; g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(v, t + .004); g.gain.exponentialRampToValueAtTime(.0001, t + d);
+            o.connect(g); g.connect(a.destination); o.start(t); o.stop(t + d + .02)
+        }
+        function tick(low) { low ? (beep(1560, .07, .16), setTimeout(() => beep(1560, .07, .12), 110)) : beep(880, .045, .07) }
+        const ICON = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">';
+        function updSnd() { $('snd').innerHTML = ICON + '<path d="M4 9v6h4l5 4V5L8 9H4z"/>' + (snd ? '<path d="M16.5 8.5a5 5 0 0 1 0 7"/><path d="M19 6a8.5 8.5 0 0 1 0 12"/>' : '<path d="M17 9l5 6M22 9l-5 6"/>') + '</svg>'; $('snd').title = snd ? 'ปิดเสียง' : 'เปิดเสียง' }
+        const sel = { mode: null, style: null, diff: null };
+        let G = null, raf = 0, lastId = null;
+        const rnd = n => Math.floor(Math.random() * n);
+        const esc = s => s.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        const catName = (m, st, d) => MODES[m].label + ' · ' + STYLES[st].label + ' · ' + DIFFS[d].label;
+
+        /* ---------- อันดับ ---------- */
+        function loadLB() { try { return JSON.parse(localStorage.getItem(KEY)) || [] } catch (e) { return [] } }
+        function saveLB(a) { try { localStorage.setItem(KEY, JSON.stringify(a)) } catch (e) { } }
+        const cmp = (a, b) => b.score - a.score || (a.mode !== 'attack' ? a.time - b.time : a.tried - b.tried);
+        /* ชื่อซ้ำในหมวดเดียวกัน (โหมด + รูปแบบ + ระดับ) เก็บเฉพาะสถิติที่ดีที่สุด */
+        const catKey = x => [x.mode, x.style, x.diff, String(x.name).trim().toLowerCase()].join('|');
+        function dedupe(all) {
+            const best = new Map();
+            for (const x of all) { const k = catKey(x), o = best.get(k); if (!o || cmp(x, o) < 0) best.set(k, x) }
+            return all.filter(x => best.get(catKey(x)) === x);
+        }
+        function renderLB(el, tEl, m, st, d) {
+            tEl.textContent = 'อันดับสูงสุด — ' + catName(m, st, d);
+            const lb = dedupe(loadLB()).filter(x => x.mode === m && x.style === st && x.diff === d).sort(cmp).slice(0, 10);
+            if (!lb.length) { el.innerHTML = '<div class="empty">ยังไม่มีสถิติในหมวดนี้</div>'; return }
+            el.innerHTML = lb.map((x, i) => `<div class="li ${x.id === lastId ? 'me' : ''}"><span class="av r${i < 3 ? i + 1 : 0}">${i + 1}</span><div class="nm"><b>${esc(x.name)}</b><small>${m !== 'attack' ? x.time.toFixed(1) + ' วินาที' : x.tried + ' ข้อที่เล่น'}</small></div><span class="pt">${x.score}</span></div>`).join('');
+        }
+
+        /* ---------- ตัวสร้างโจทย์ ---------- */
+        const OPS = ['+', '−', '×', '÷'];
+        function perms(a) { if (a.length < 2) return [a]; const r = []; a.forEach((x, i) => perms(a.filter((_, j) => j !== i)).forEach(p => r.push([x, ...p]))); return r }
+        function X(o, L, R) {
+            if (!L || !R) return null;
+            if (o === '÷' && R.v === 0) return null;
+            const p = (o === '+' || o === '−') ? 1 : 2;
+            const v = o === '+' ? L.v + R.v : o === '−' ? L.v - R.v : o === '×' ? L.v * R.v : L.v / R.v;
+            const ls = L.p < p ? `(${L.s})` : L.s;
+            const rs = (R.p < p || (R.p === p && (o === '−' || o === '÷'))) ? `(${R.s})` : R.s;
+            return { v, s: `${ls} ${o} ${rs}`, p };
+        }
+        function allExprs(n) {
+            const out = [], seen = new Set();
+            for (const q of perms(n)) {
+                const [A, B, C, D] = q.map(x => ({ v: x, s: String(x), p: 3 }));
+                for (const o1 of OPS) for (const o2 of OPS) for (const o3 of OPS) {
+                    const P = [X(o3, X(o2, X(o1, A, B), C), D), X(o3, X(o1, A, X(o2, B, C)), D), X(o1, A, X(o3, X(o2, B, C), D)), X(o1, A, X(o2, B, X(o3, C, D))), X(o2, X(o1, A, B), X(o3, C, D))];
+                    for (const e of P) { if (e && isFinite(e.v) && !seen.has(e.s)) { seen.add(e.s); out.push(e) } }
+                }
+            }
+            return out;
+        }
+        function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = rnd(i + 1);[a[i], a[j]] = [a[j], a[i]] } return a }
+        function modN(n, k) {
+            if (!n || !k || Math.abs(n.v) < 2) return n;
+            const b = n.p < 5 ? `(${n.s})` : n.s; let v, t;
+            if (k === 1) { v = n.v * n.v; t = b + '²' }
+            else if (k === 2) { v = n.v * n.v * n.v; t = b + '³' }
+            else { if (n.v < 0) return n; const r = Math.sqrt(n.v); if (Math.abs(r - Math.round(r)) > 1e-9) return n; v = Math.round(r); t = '√' + b }
+            if (!isFinite(v) || Math.abs(v) > 1500) return n;
+            return { v, s: t, p: 5 };
+        }
+        function rndExpr(n) {
+            const R = a => a[rnd(a.length)], K = () => { const q = Math.random(); return q < .62 ? 0 : q < .8 ? 1 : q < .88 ? 2 : 3 };
+            const [A, B, C, D] = n.map(x => modN({ v: x, s: String(x), p: 5 }, K()));
+            const o = () => R(OPS), m = x => modN(x, Math.random() < .3 ? (K() || 1) : 0);
+            switch (rnd(5)) {
+                case 0: return X(o(), m(X(o(), m(X(o(), A, B)), C)), D);
+                case 1: return X(o(), m(X(o(), A, m(X(o(), B, C)))), D);
+                case 2: return X(o(), A, m(X(o(), m(X(o(), B, C)), D)));
+                case 3: return X(o(), A, m(X(o(), B, m(X(o(), C, D)))));
+                default: return X(o(), m(X(o(), A, B)), m(X(o(), C, D)));
+            }
+        }
+        function makeExpert() {
+            for (; ;) {
+                const n = Array.from({ length: 4 }, () => 1 + rnd(9)), good = [], bad = [], seen = new Set();
+                for (let t = 0; t < 8000; t++) {
+                    const e = rndExpr(shuffle(n.slice()));
+                    if (!e || !isFinite(e.v) || !/[²³√]/.test(e.s) || seen.has(e.s)) continue; seen.add(e.s);
+                    const k = Math.abs(e.v - 24);
+                    if (k < 1e-6) good.push(e); else if (k <= 10) bad.push(e);
+                }
+                if (!good.length || bad.length < 3) continue;
+                const right = good[rnd(good.length)], picks = [], vals = new Set();
+                for (const b of shuffle(bad)) { const k = Math.round(b.v * 100); if (vals.has(k)) continue; vals.add(k); picks.push(b); if (picks.length === 3) break }
+                if (picks.length < 3) continue;
+                return { n: shuffle(n.slice()), opts: shuffle([{ s: right.s, ok: true }, ...picks.map(p => ({ s: p.s, ok: false }))]) };
+            }
+        }
+        function makeQ(d) {
+            if (d === 'expert') return makeExpert();
+            const c = DIFFS[d];
+            for (; ;) {
+                const n = Array.from({ length: 4 }, () => 1 + rnd(c.max)), ex = allExprs(n);
+                let good = ex.filter(e => Math.abs(e.v - 24) < 1e-6);
+                if (!good.length) continue;
+                if (d === 'easy') { const a = good.filter(e => !/[÷−]/.test(e.s)), b = good.filter(e => !e.s.includes('÷')); good = a.length ? a : b.length ? b : good }
+                if (d === 'hard') { const a = good.filter(e => e.s.includes('÷')); if (a.length) good = a }
+                let bad = ex.filter(e => Math.abs(e.v - 24) > 1e-6 && Math.abs(e.v) < 150);
+                if (d !== 'hard') bad = bad.filter(e => Math.abs(e.v - Math.round(e.v)) < 1e-6);
+                if (d === 'easy') bad = bad.filter(e => { const k = Math.abs(e.v - 24); return k >= 5 && k <= 30 });
+                else { bad.sort((x, y) => Math.abs(x.v - 24) - Math.abs(y.v - 24)); bad = bad.slice(0, d === 'hard' ? 20 : 60) }
+                const right = good[rnd(good.length)], picks = [], vals = new Set();
+                for (const b of shuffle(bad.slice())) { const k = Math.round(b.v * 1000); if (vals.has(k)) continue; vals.add(k); picks.push(b); if (picks.length === 3) break }
+                if (picks.length < 3) continue;
+                return { n: shuffle(n.slice()), opts: shuffle([{ s: right.s, ok: true }, ...picks.map(p => ({ s: p.s, ok: false }))]) };
+            }
+        }
+
+        /* ---------- โหมดต่อสมการ (แบบ Math24: รวมเลขทีละคู่) ---------- */
+        function makeM(d) {
+            if (d === 'expert') {
+                for (; ;) {
+                    const n = Array.from({ length: 4 }, () => 1 + rnd(9)), good = [], seen = new Set();
+                    for (let t = 0; t < 6000 && good.length < 12; t++) {
+                        const e = rndExpr(shuffle(n.slice()));
+                        if (!e || !isFinite(e.v) || !/[²³√]/.test(e.s) || seen.has(e.s)) continue; seen.add(e.s);
+                        if (Math.abs(e.v - 24) < 1e-6) good.push(e);
+                    }
+                    if (good.length) return { n: shuffle(n.slice()), sol: good[rnd(good.length)].s, pw: true };
+                }
+            }
+            for (; ;) {
+                const n = Array.from({ length: 4 }, () => 1 + rnd(DIFFS[d].max));
+                let good = allExprs(n).filter(e => Math.abs(e.v - 24) < 1e-6);
+                if (!good.length) continue;
+                if (d === 'easy') { const a = good.filter(e => !/[÷−]/.test(e.s)), b = good.filter(e => !e.s.includes('÷')); good = a.length ? a : b.length ? b : good }
+                return { n: shuffle(n.slice()), sol: good[rnd(good.length)].s, pw: false };
+            }
+        }
+        /* เศษส่วนแบบแม่นยำ */
+        const gcd = (a, b) => b ? gcd(b, a % b) : Math.abs(a);
+        const Fr = (n, d = 1) => { if (d < 0) { n = -n; d = -d } const g = gcd(n, d) || 1; return { n: n / g, d: d / g } };
+        const fadd = (a, b) => Fr(a.n * b.d + b.n * a.d, a.d * b.d), fsub = (a, b) => Fr(a.n * b.d - b.n * a.d, a.d * b.d);
+        const fmul = (a, b) => Fr(a.n * b.n, a.d * b.d), fdiv = (a, b) => Fr(a.n * b.d, a.d * b.n);
+        const fstr = f => (f.n < 0 ? '−' : '') + Math.abs(f.n) + (f.d === 1 ? '' : '/' + f.d);
+        const fval = f => f.n / f.d, is24 = f => f.d === 1 && f.n === 24;
+        function funary(o, f) {
+            if (o === '²') return fmul(f, f);
+            if (o === '³') return fmul(fmul(f, f), f);
+            if (f.n < 0) return null;
+            const r = Math.round(Math.sqrt(f.n)), q = Math.round(Math.sqrt(f.d));
+            return r * r === f.n && q * q === f.d ? Fr(r, q) : null;
+        }
+        const BIN = { '+': fadd, '−': fsub, '×': fmul, '÷': fdiv };
+        let cid = 10;
+        function mHint(t, err) { const h = $('mval'); h.textContent = t || '\u00a0'; h.className = 'mval' + (err ? ' err' : '') }
+        function mDefaultHint() {
+            if (!G || !G.cards) return;
+            const a = G.cards.find(c => c.id === G.selA);
+            mHint(!a ? 'แตะตัวเลขตัวแรก' : G.selOp ? `${fstr(a.f)} ${G.selOp}  แตะตัวเลขตัวที่สอง` : `${fstr(a.f)}  เลือกเครื่องหมาย${G.q.pw ? ' (หรือ ² ³ √)' : ''}`);
+        }
+        function mRender(popId, still) {
+            $('nums').classList.add('b');
+            $('nums').innerHTML = G.cards.map(c => {
+                const t = fstr(c.f), z = t.length >= 5 ? 'sm' : t.length >= 3 ? 'md' : '';
+                return `<button class="num ${c.col} ${z} ${still ? 'still' : ''} ${c.id === popId ? 'pop' : ''} ${c.id === G.selA ? 'sel' : ''}" data-id="${c.id}">${t}</button>`;
+            }).join('');
+            document.querySelectorAll('#mops .mop').forEach(b => b.classList.toggle('on', !!G.selOp && b.dataset.o === G.selOp));
+        }
+        function mReset(still) {
+            G.cards = G.q.n.map((v, i) => ({ id: i, f: Fr(v), col: 'c' + i })); G.hist = []; G.selA = null; G.selOp = null;
+            mRender(null, still); mDefaultHint();
+        }
+        const mLive = () => G && G.style === 'build' && G.phase === 'ask' && !G.paused && !G.busy;
+        function mAfter(newId) {
+            G.selA = null; G.selOp = null; mRender(newId, true);
+            if (G.cards.length === 1) {
+                const f = G.cards[0].f;
+                if (is24(f)) { return mEnd(true) }
+                if (!G.q.pw) {
+                    const q = G.q, pen = G.mode === 'attack'; G.busy = true; shake(); beep(200, .18, .1, 'sawtooth');
+                    if (pen) G.clock += 1000;
+                    document.querySelector('#nums .num').classList.add('bad');
+                    mHint(`ได้ ${fstr(f)} ยังไม่ใช่ 24` + (pen ? ' (เสียเวลา 1 วินาที)' : ' ลองใหม่'), true);
+                    setTimeout(() => { if (G && G.q === q && G.phase === 'ask') { G.busy = false; mReset(true) } }, 850);
+                    return;
+                }
+                mHint(`ได้ ${fstr(f)} — ใช้ ² ³ √ ต่อ หรือกดย้อนกลับ/ล้างเพื่อลองใหม่`, true); return;
+            }
+            mDefaultHint();
+        }
+        function mCard(id) {
+            if (!mLive()) return;
+            const c = G.cards.find(x => x.id === id); if (!c) return; beep(620, .04, .06);
+            if (G.selA == null) G.selA = id;
+            else if (G.selOp == null) G.selA = G.selA === id ? null : id;
+            else if (G.selA === id) { G.selA = null; G.selOp = null }
+            else {
+                const a = G.cards.find(x => x.id === G.selA);
+                if (G.selOp === '÷' && c.f.n === 0) { shake(); G.selOp = null; mRender(null, true); mHint('หารด้วย 0 ไม่ได้', true); return }
+                const r = BIN[G.selOp](a.f, c.f);
+                G.hist.push(JSON.parse(JSON.stringify(G.cards)));
+                const nid = cid++; G.cards = G.cards.filter(x => x.id !== a.id).map(x => x.id === c.id ? { id: nid, f: r, col: 'r' } : x);
+                beep(780, .09, .1); return mAfter(nid);
+            }
+            mRender(null, true); mDefaultHint();
+        }
+        function mOp(o) {
+            if (!mLive()) return;
+            if (/[²³√]/.test(o)) {
+                if (!G.q.pw) return;
+                if (G.selA == null) { shake(); mHint('เลือกตัวเลขก่อน แล้วค่อยกด ' + o, true); return }
+                const a = G.cards.find(x => x.id === G.selA), r = funary(o, a.f);
+                if (!r || Math.abs(r.n) > 1e7 || r.d > 1e7) { shake(); G.selA = null; mRender(null, true); mHint(o === '√' ? `√${fstr(a.f)} ไม่ลงตัว ใช้ไม่ได้` : 'ตัวเลขใหญ่เกินไป', true); return }
+                G.hist.push(JSON.parse(JSON.stringify(G.cards))); const nid = cid++;
+                G.cards = G.cards.map(x => x.id === a.id ? { id: nid, f: r, col: 'r' } : x); beep(780, .09, .1); return mAfter(nid);
+            }
+            if (G.selA == null) { shake(); mHint('เลือกตัวเลขตัวแรกก่อน', true); return }
+            beep(480, .04, .06); G.selOp = G.selOp === o ? null : o; mRender(null, true); mDefaultHint();
+        }
+        function mUndo() {
+            if (!mLive() || !G.hist.length) return; beep(360, .04, .05);
+            G.cards = G.hist.pop(); G.selA = null; G.selOp = null; mRender(null, true); mDefaultHint();
+        }
+        function mClear() { if (!mLive()) return; beep(300, .05, .05); mReset(true) }
+        function mSetup() {
+            G.phase = 'ask'; G.qStart = G.clock; G.lastSec = null; G.busy = false;
+            $('qn').textContent = G.mode === 'classic' ? `${G.idx}/${TOTAL}` : G.idx; $('sc').textContent = G.score;
+            $('opts').classList.add('hidden'); $('mb').classList.remove('hidden');
+            $('nums').classList.remove('cheer', 'sad');
+            $('mops').innerHTML = (G.q.pw ? ['+', '−', '×', '÷', '²', '³', '√'] : ['+', '−', '×', '÷']).map(o => `<button class="mop ${/[²³√]/.test(o) ? 'un' : ''}" data-o="${o}">${o}</button>`).join('');
+            $('msol').classList.add('hidden');
+            $('mdel').disabled = $('mclr').disabled = $('mskip').disabled = false;
+            mReset(false);
+        }
+        function mEnd(ok) {
+            if (!G || G.phase !== 'ask' || G.paused) return;
+            G.phase = 'fb'; G.tried++; G.busy = false; if (G.mode === 'classic') G.used += Math.min(MT[G.diff], G.clock - G.qStart);
+            document.querySelectorAll('#nums button,#mb button').forEach(b => b.disabled = true);
+            if (ok) {
+                G.score++; $('sc').textContent = G.score; bump(); const cd = document.querySelector('#nums .num'); cd.classList.add('win');
+                const r = cd.getBoundingClientRect(); burst(r.left + r.width / 2, r.top + r.height / 2, 30); floatText(r.left + r.width / 2, r.top, '+1');
+                mHint('ได้ 24 แล้ว!'); $('mval').classList.add('hit');
+                beep(660, .1, .12); setTimeout(() => beep(990, .16, .12), 90);
+            } else {
+                shake(); $('nums').classList.add('sad'); beep(200, .2, .12, 'sawtooth'); mHint('');
+                $('msol').innerHTML = `<small>ตัวอย่างคำตอบ</small>${G.q.sol} = 24`; $('msol').classList.remove('hidden');
+            }
+            G.fbEnd = G.clock + (G.mode === 'attack' ? (ok ? 600 : 1100) : (ok ? 900 : 2200));
+        }
+        $('nums').addEventListener('click', e => { const b = e.target.closest('button.num'); if (b) mCard(+b.dataset.id) });
+        $('mops').onclick = e => { const b = e.target.closest('button'); if (b) mOp(b.dataset.o) };
+        $('mdel').onclick = mUndo; $('mclr').onclick = mClear; $('mskip').onclick = () => { if (G && G.style === 'build' && G.phase === 'ask' && !G.paused) mEnd(false) };
+        /* ---------- หน้าเริ่มต้น ---------- */
+        function show(id) { ['s-start', 's-game', 's-end'].forEach(s => $(s).classList.toggle('hidden', s !== id)); const el = $(id); el.classList.remove('in'); void el.offsetWidth; el.classList.add('in') }
+        const MICON = { classic: '<svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="3"/><path d="M8 10h8M8 14h5"/></svg>', attack: '<svg viewBox="0 0 24 24"><circle cx="12" cy="13.5" r="7"/><path d="M12 9.5v4l2.5 2M9.5 3h5"/></svg>' };
+        const SICON = { choice: '<svg viewBox="0 0 24 24"><circle cx="6" cy="7" r="2"/><circle cx="6" cy="17" r="2"/><path d="M11 7h9M11 17h9"/></svg>', build: '<svg viewBox="0 0 24 24"><path d="M6 7h6M9 4v6M14 17h6M5 17l5-5M10 17l-5-5"/></svg>' };
+        const MDESC = { classic: 'ตอบทีละข้อ มีเวลาจำกัดต่อข้อ', attack: '60 วินาที ทำให้ได้มากที่สุด' };
+        const SDESC = { choice: 'เลือกสมการที่ได้ 24 จาก 4 ตัวเลือก', build: 'แตะเลข เลือกเครื่องหมาย แล้วแตะเลขอีกตัว รวมกันจนได้ 24 (แบบ Math24)' };
+        const BARS = { easy: 1, medium: 2, expert: 3 };
+        const barsIcon = n => `<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">${[6, 11, 16].map((h, i) => `<rect x="${3 + i * 7}" y="${20 - h}" width="4.5" height="${h}" rx="1.5" opacity="${i < n ? 1 : .25}"/>`).join('')}</svg>`;
+        function renderSel() {
+            const tile = (cur, ico, des) => ([k, v]) => `<button class="tile ${cur === k ? 'on' : ''}" data-k="${k}">${ico[k]}<b>${v.label}</b><small>${des[k]}</small></button>`;
+            $('seg-mode').innerHTML = Object.entries(MODES).map(tile(sel.mode, MICON, MDESC)).join('');
+            $('seg-style').innerHTML = Object.entries(STYLES).map(tile(sel.style, SICON, SDESC)).join('');
+            $('seg-diff').innerHTML = Object.entries(DIFFS).map(([k, v]) => `<button class="dif ${sel.diff === k ? 'on' : ''}" data-k="${k}"><span>${barsIcon(BARS[k])}</span><em>${v.label}</em></button>`).join('');
+        }
+        $('seg-mode').onclick = e => {
+            const b = e.target.closest('button'); if (!b) return;
+            if (sel.mode !== b.dataset.k) { sel.mode = b.dataset.k; sel.style = null; sel.diff = null; $('style-wrap').classList.add('hidden'); $('dif-wrap').classList.add('hidden') }
+            refresh();
+        };
+        $('seg-style').onclick = e => {
+            const b = e.target.closest('button'); if (!b) return;
+            if (sel.style !== b.dataset.k) { sel.style = b.dataset.k; sel.diff = null; $('dif-wrap').classList.add('hidden') }
+            refresh();
+        };
+        $('seg-diff').onclick = e => { const b = e.target.closest('button'); if (b) { sel.diff = b.dataset.k; refresh() } };
+        function reveal(el, on) { const was = el.classList.contains('hidden'); el.classList.toggle('hidden', !on); if (on && was) { el.classList.remove('rv'); void el.offsetWidth; el.classList.add('rv'); return true } return false }
+        function refresh() {
+            renderSel();
+            const m = sel.mode, st = sel.style, d = sel.diff, D = d && DIFFS[d];
+            if (reveal($('style-wrap'), !!m)) $('style-wrap').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            if (reveal($('dif-wrap'), !!(m && st))) $('dif-wrap').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            let info = '';
+            if (m && st && D) {
+                const base = st === 'build' ? MATHDESC[d] : D.desc;
+                info = base + (m === 'classic' ? ` · ${(st === 'build' ? MT[d] : D.t) / 1000} วินาที/ข้อ` + (st === 'build' ? ' · ตอบผิดลองใหม่ได้' : '') : ' · เล่นให้ได้มากที่สุดใน 60 วินาที ตอบผิดเสียเวลา 1 วินาที');
+            }
+            $('info').textContent = info;
+            const all = !!(m && st && d); reveal($('lb-wrap'), all);
+            if (all) renderLB($('lb-start'), $('lb-t1'), m, st, d);
+            chk();
+        }
+        function toStart(clear) {
+            cancelAnimationFrame(raf); G && (G.paused = true);
+            if (clear) $('name').value = '';
+            show('s-start'); refresh(); chk(); $('name').focus();
+        }
+        function chk() { $('go').disabled = !($('name').value.trim() && sel.mode && sel.style && sel.diff) }
+
+        /* ---------- เล่นเกม ---------- */
+        let counting = false;
+        function countdown(cb) {
+            const ov = $('cdn'), n = $('cdn-n'), r = $('cdn-r'), l = $('cdn-l'), seq = ['3', '2', '1', 'GO!']; let i = 0;
+            ov.classList.remove('hidden');
+            (function step() {
+                if (i >= seq.length) { ov.classList.add('hidden'); return cb() }
+                const go = i === 3; n.textContent = seq[i]; l.textContent = go ? 'เริ่มเลย!' : 'เตรียมพร้อม';
+                n.className = 'cn' + (go ? ' go' : '');
+                [n, r].forEach(e => { e.style.animation = 'none'; void e.offsetWidth; e.style.animation = '' });
+                if (go) { beep(880, .1, .2, 'sine'); setTimeout(() => beep(1320, .28, .22, 'sine'), 100); burst(innerWidth / 2, innerHeight / 2, 50) }
+                else beep(600 + i * 60, .16, .2, 'sine');
+                i++; setTimeout(step, go ? 650 : 900);
+            })();
+        }
+        function start(name, mode, style, diff) {
+            if (counting) return; counting = true; cancelAnimationFrame(raf); audio();
+            countdown(() => { counting = false; begin(name, mode, style, diff) });
+        }
+        function begin(name, mode, style, diff) {
+            cancelAnimationFrame(raf); lastId = null;
+            G = { name, mode, style, diff, score: 0, tried: 0, used: 0, idx: 0, q: null, phase: 'ask', clock: 0, qStart: 0, fbEnd: 0, paused: false, last: performance.now() };
+            $('who').textContent = name + ' · ' + catName(mode, style, diff);
+            $('qlab').textContent = 'ข้อ'; $('tlab').textContent = mode === 'attack' ? 'เวลารวม (วิ)' : 'เวลา (วิ)';
+            $('ov').classList.add('hidden'); show('s-game'); nextQ(); raf = requestAnimationFrame(loop);
+        }
+        function nextQ() {
+            if (G.mode === 'classic' && G.idx >= TOTAL) return finish(false);
+            if (G.style === 'build') { G.q = makeM(G.diff); G.idx++; return mSetup() }
+            $('opts').classList.remove('hidden'); $('mb').classList.add('hidden'); $('nums').classList.remove('b');
+            G.q = makeQ(G.diff); G.idx++;
+            $('nums').classList.remove('cheer', 'sad'); G.phase = 'ask'; G.qStart = G.clock; G.lastSec = null;
+            $('qn').textContent = G.mode === 'classic' ? `${G.idx}/${TOTAL}` : G.idx; $('sc').textContent = G.score;
+            $('nums').innerHTML = G.q.n.map(x => `<div class="num">${x}</div>`).join('');
+            $('opts').innerHTML = G.q.opts.map((o, i) => `<button class="opt" data-i="${i}"><b>${i + 1}</b><span>${o.s}</span></button>`).join('');
+            $('opts').querySelectorAll('.opt').forEach(b => b.onclick = () => answer(+b.dataset.i));
+        }
+        function loop(ts) {
+            if (!G) return;
+            const dt = Math.min(ts - G.last, 250); G.last = ts;
+            if (!G.paused) {
+                G.clock += dt;
+                const att = G.mode === 'attack', T = att ? ATTACK : G.style === 'build' ? MT[G.diff] : DIFFS[G.diff].t;
+                const left = att ? Math.max(0, ATTACK - G.clock) : Math.max(0, T - (G.clock - G.qStart));
+                if (G.phase === 'fb' && !att) $('fill').style.width = (left / T * 100) + '%';
+                if (G.phase === 'ask' || att) { $('fill').style.width = (left / T * 100) + '%'; $('tl').textContent = (left / 1000).toFixed(1); { const lo = left <= (att ? 10000 : 3000); $('bar').classList.toggle('low', lo); $('tl').classList.toggle('low', lo); const sc = Math.ceil(left / 1000); if (left > 0 && sc !== G.lastSec) { G.lastSec = sc; tick(lo) } } }
+                if (att && left <= 0) return finish(false);
+                if (G.phase === 'ask' && !att && left <= 0) G.style === 'build' ? mEnd(false) : answer(-1);
+                else if (G.phase === 'fb' && G.clock >= G.fbEnd) nextQ();
+            }
+            raf = requestAnimationFrame(loop);
+        }
+        function answer(i) {
+            if (!G || G.phase !== 'ask' || G.paused) return;
+            G.phase = 'fb'; G.tried++;
+            const q = G.q, ok = i >= 0 && q.opts[i].ok;
+            if (G.mode === 'classic') G.used += Math.min(DIFFS[G.diff].t, G.clock - G.qStart);
+            $('opts').querySelectorAll('.opt').forEach((b, k) => { b.disabled = true; if (q.opts[k].ok) b.classList.add('ok'); else if (k === i) b.classList.add('bad') });
+            const el = $('opts').querySelectorAll('.opt')[i];
+            if (ok) { G.score++; $('sc').textContent = G.score; bump(); $('nums').classList.add('cheer'); if (el) { const r = el.getBoundingClientRect(); burst(r.left + r.width / 2, r.top + r.height / 2, 26); floatText(r.left + r.width / 2, r.top, '+1') } }
+            else { shake(); $('nums').classList.add('sad') }
+            G.fbEnd = G.clock + (ok ? 600 : G.mode === 'attack' ? 1000 : i < 0 ? 1100 : 1000);
+        }
+        function pause(on) { if (!G) return; G.paused = on; $('ov').classList.toggle('hidden', !on) }
+        function finish(stopped) {
+            cancelAnimationFrame(raf); $('ov').classList.add('hidden');
+            const g = G, m = g.mode, st = g.style, d = g.diff; g.paused = true;
+            let rank = null, kind = 'new';
+            if (g.tried > 0) {
+                const entry = { id: Date.now() + '-' + Math.random().toString(36).slice(2, 6), name: g.name, mode: m, style: st, diff: d, score: g.score, tried: g.tried, time: Math.round(g.used / 100) / 10, date: Date.now() };
+                const all = dedupe(loadLB()), old = all.find(x => catKey(x) === catKey(entry)); let keepId = entry.id;
+                if (!old) all.push(entry);
+                else if (cmp(entry, old) < 0) { all.splice(all.indexOf(old), 1, entry); kind = 'beat' }
+                else { keepId = old.id; kind = 'keep' }
+                lastId = keepId;
+                all.sort(cmp); const keep = []; const cnt = {};
+                for (const x of all) { const k = x.mode + x.style + x.diff; cnt[k] = (cnt[k] || 0) + 1; if (cnt[k] <= 30) keep.push(x) }
+                saveLB(keep);
+                const idx = keep.filter(x => x.mode === m && x.style === st && x.diff === d).sort(cmp).findIndex(x => x.id === keepId); rank = idx < 0 ? null : idx + 1;
+            }
+            $('endcat').textContent = catName(m, st, d);
+            const ratio = g.score / (m === 'classic' ? TOTAL : st === 'build' ? 8 : 20);
+            $('endmsg').textContent = g.name + ' — ' + (stopped ? 'หยุดเกมแล้ว' : ratio >= .8 ? 'ยอดเยี่ยมมาก' : ratio >= .5 ? 'ทำได้ดี' : ratio >= .2 ? 'พยายามอีกนิด' : 'ลองใหม่อีกครั้ง');
+            countUp($('fs'), g.score); $('fsub').textContent = m === 'classic' ? `คะแนน จาก ${TOTAL} ${st === 'build' ? 'โจทย์' : 'ข้อ'}` : 'คะแนน ใน 60 วินาที';
+            const acc = g.tried ? Math.round(g.score / g.tried * 100) : 0;
+            $('endstats').innerHTML = `<div><small>${st === 'build' ? 'โจทย์ที่เล่น' : 'ข้อที่เล่น'}</small><b>${g.tried}</b></div><div><small>ตอบถูก</small><b>${g.score}</b></div><div><small>${m !== 'attack' ? 'เวลารวม (วิ)' : 'แม่นยำ'}</small><b>${m !== 'attack' ? (g.used / 1000).toFixed(1) : acc + '%'}</b></div>`;
+            $('rank').textContent = rank ? (kind === 'beat' ? `ทำลายสถิติของตัวเองแล้ว! อันดับที่ ${rank} ในหมวดนี้` : kind === 'keep' ? `ยังไม่ทำลายสถิติเดิม สถิติที่ดีที่สุดของคุณอยู่อันดับที่ ${rank}` : `อันดับที่ ${rank} ในหมวดนี้`) : g.tried ? '' : 'ยังไม่ได้ตอบข้อใด จึงไม่บันทึกอันดับ';
+            renderLB($('lb-end'), $('lb-t2'), m, st, d); show('s-end');
+            if (!stopped && ratio >= .5) [.25, .5, .75].forEach((f, k) => setTimeout(() => burst(innerWidth * f, innerHeight * .3, 40), k * 250));
+        }
+
+        /* ---------- events ---------- */
+        $('name').oninput = chk;
+        $('name').onkeydown = e => { if (e.key === 'Enter' && !$('go').disabled) $('go').click() };
+        $('go').onclick = () => { const n = $('name').value.trim().slice(0, 16); if (n) start(n, sel.mode, sel.style, sel.diff) };
+        $('again').onclick = () => start(G.name, G.mode, G.style, G.diff);
+        $('rename').onclick = () => toStart(true);
+        $('remode').onclick = () => { $('name').value = G.name; sel.mode = null; sel.style = null; sel.diff = null; toStart(false) };
+        $('stop').onclick = () => pause(true);
+        $('snd').onclick = () => { snd = !snd; try { localStorage.setItem('game24_snd', snd ? '1' : '0') } catch (e) { } updSnd(); beep(880, .08, .1) };
+        $('resume').onclick = () => pause(false);
+        $('stopok').onclick = () => finish(true);
+        document.addEventListener('keydown', e => {
+            if ($('s-game').classList.contains('hidden')) return;
+            if (e.key === 'Escape') return pause(!G.paused);
+            if (G.style === 'build') {
+                if (!mLive()) return;
+                const key = e.key, map = { '+': '+', '-': '−', '*': '×', 'x': '×', '/': '÷' };
+                if (/^[0-9]$/.test(key)) {
+                    const cs = G.cards.filter(c => c.f.d === 1 && c.f.n === +key), c = cs.find(c => c.id !== G.selA) || cs[0];
+                    if (c) mCard(c.id);
+                } else if (map[key]) { e.preventDefault(); mOp(map[key]) }
+                else if (key === 'Backspace') { e.preventDefault(); mUndo() }
+                return;
+            }
+            const k = +e.key; if (k >= 1 && k <= 4) answer(k - 1);
+        });
+        if (matchMedia('(pointer:fine)').matches) {
+            const cd = $('cd'), cr = $('cr'); let mx = 0, my = 0, rx = 0, ry = 0, seen = false;
+            document.documentElement.classList.add('cx');
+            addEventListener('mousemove', e => {
+                mx = e.clientX; my = e.clientY; if (!seen) { seen = true; rx = mx; ry = my }
+                cd.style.transform = `translate3d(${mx}px,${my}px,0)`;
+                const t = e.target.closest && e.target.closest('button,.opt,input'), inp = !!t && t.tagName === 'INPUT';
+                cr.classList.toggle('hov', !!t && !inp); cd.style.opacity = cr.style.opacity = inp ? 0 : 1
+            });
+            addEventListener('mousedown', () => cr.classList.add('down')); addEventListener('mouseup', () => cr.classList.remove('down'));
+            document.addEventListener('mouseleave', () => { cd.style.opacity = cr.style.opacity = 0 });
+            (function f() { rx += (mx - rx) * .2; ry += (my - ry) * .2; cr.style.transform = `translate3d(${rx}px,${ry}px,0)`; requestAnimationFrame(f) })();
+        }
+        document.addEventListener('click', e => {
+            const b = e.target.closest('.btn,.opt,.tile,.dif'); if (!b || RM || b.disabled) return;
+            const r = b.getBoundingClientRect(), z = Math.max(r.width, r.height) * 2, s = document.createElement('span');
+            s.className = 'rip'; s.style.cssText = `width:${z}px;height:${z}px;left:${e.clientX - r.left - z / 2}px;top:${e.clientY - r.top - z / 2}px`;
+            b.appendChild(s); setTimeout(() => s.remove(), 650);
+            if (b.classList.contains('btn')) burst(e.clientX, e.clientY, 8);
+        });
+        updSnd(); refresh(); chk();
+
+        /* ---------- หน้าโหลด + เอฟเฟกต์มิติ ---------- */
+        (function () {
+            const host = document.createElement('div'); host.id = 'bgfx';
+            const CS = ['#4650c8', '#f8de4a', '#e2553c', '#fffaf0', '#1f7a52'], TS = ['ci', 'sq', 'tr', 'rg2', 'sy', 'sy'], SY = ['+', '−', '×', '÷', '24', '='];
+            for (let i = 0; i < 14; i++) {
+                const t = TS[rnd(TS.length)], p = document.createElement('div'), d = .3 + Math.random() * 1.4;
+                p.className = 'p ' + t;
+                p.style.cssText = `left:${rnd(96)}%;top:${rnd(92)}%;--d:${d.toFixed(2)};--s:${t === 'sy' ? 44 + rnd(60) : 22 + rnd(54)}px;--c:${CS[rnd(CS.length)]};--t:${5 + rnd(6)}s;--b:${d < .6 ? 1.5 : 0}px`;
+                p.innerHTML = '<i>' + (t === 'sy' ? SY[rnd(SY.length)] : '') + '</i>'; host.appendChild(p);
+            }
+            document.body.prepend(host);
+            if (!matchMedia('(pointer:fine)').matches || RM) return;
+            const root = document.documentElement; let tx = 0, ty = 0, cx = 0, cy = 0;
+            addEventListener('pointermove', e => { tx = e.clientX / innerWidth * 2 - 1; ty = e.clientY / innerHeight * 2 - 1 });
+            (function f() {
+                if (Math.abs(tx - cx) + Math.abs(ty - cy) > .0008) { cx += (tx - cx) * .08; cy += (ty - cy) * .08; root.style.setProperty('--mx', cx.toFixed(3)); root.style.setProperty('--my', cy.toFixed(3)) }
+                requestAnimationFrame(f);
+            })();
+        })();
+        (function () {
+            const ld = $('ld'), n = $('ldn'), f = $('ldf'), t = $('ldt'), MS = [[0, 'กำลังสับไพ่ตัวเลข…'], [30, 'กำลังเตรียมโจทย์…'], [60, 'กำลังจัดสมการ…'], [90, 'เกือบพร้อมแล้ว!']];
+            let ready = false, p = 1, last = performance.now(), done = false; const hold = [[38, 260], [82, 320]], dur = RM ? 500 : 2600;
+            Promise.race([document.fonts ? document.fonts.ready : 0, new Promise(r => setTimeout(r, 4000))]).then(() => ready = true);
+            function leave() {
+                show('s-start'); burst(innerWidth / 2, innerHeight / 2, 44);
+                ld.classList.add('out'); setTimeout(() => { ld.remove(); if (matchMedia('(pointer:fine)').matches) $('name').focus() }, 950);
+            }
+            (function frame(ts) {
+                const dt = Math.min(ts - last, 60); last = ts;
+                const h = hold[0];
+                if (h && p >= h[0]) { h[1] -= dt; if (h[1] <= 0) hold.shift() } else p += dt * (99 / dur) * (.6 + Math.random() * .8);
+                if (p > 99) p = ready ? 100 : 99;
+                const v = Math.min(100, Math.floor(p)); n.textContent = v; f.style.width = v + '%';
+                for (const m of MS) if (v >= m[0]) t.textContent = m[1];
+                if (v >= 100) { if (!done) { done = true; setTimeout(leave, 450) } return }
+                requestAnimationFrame(frame);
+            })(last);
+        })();
+    </script>
+</body>
+
+</html>
